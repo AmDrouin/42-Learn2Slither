@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#
+# husky exécute ce fichier avec `sh`, sans respecter son shebang : il ne
+# peut donc pas contenir directement du JavaScript. Ce shim se contente de
+# déléguer à pre-commit.mjs, où vit la vraie logique (en Node).
+node "$(dirname "$0")/pre-commit.mjs"

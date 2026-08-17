@@ -1,0 +1,17 @@
+  {
+    "languages": [
+      {
+        "id": "python",
+        "label": "Python",
+        "extensions": [".py"],
+        "checks": [
+          {
+            "id": "lint",
+            "scope": "file",
+            "command": ["flake8", "{file}"],
+            "fixHint": "flake8 {file}"
+          }
+        ]
+      }
+    ]
+  }
