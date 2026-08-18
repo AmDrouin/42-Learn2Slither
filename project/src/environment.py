@@ -30,10 +30,17 @@ OPPOSITE = {
 }
 
 DELTA = {
-    Action.RIGHT: (0, -1),
-    Action.LEFT: (0, 1),
     Action.UP: (1, 0),
     Action.DOWN: (-1, 0),
+    Action.LEFT: (0, 1),
+    Action.RIGHT: (0, -1),
+}
+
+MOV_DELTA = {
+    Action.UP: (-1, 0),
+    Action.DOWN: (1, 0),
+    Action.LEFT: (0, -1),
+    Action.RIGHT: (0, 1),
 }
 
 
@@ -115,7 +122,7 @@ class Environment:
         if not self._is_reverse(action):
             self.direction = action
 
-        d_row, d_col = DELTA[self.direction]
+        d_row, d_col = MOV_DELTA[self.direction]
         head_row, head_col = self.snake[0]
         new_head = (head_row + d_row, head_col + d_col)
 
@@ -135,7 +142,7 @@ class Environment:
                 set(self.snake) | set(self.green_apples) | set([self.red_apple])
             )
             self.green_apples.append(self._spawn_apple(occupied))
-            return StepResult(Event.ATE_GREEN, True, len(self.snake))
+            return StepResult(Event.ATE_GREEN, False, len(self.snake))
 
         if new_head == self.red_apple:
             self.snake.insert(0, new_head)
