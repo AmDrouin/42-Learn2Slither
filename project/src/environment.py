@@ -108,12 +108,49 @@ class Environment:
         return self._rng.choice(possibleSpawn)
 
     def _is_reverse(self, action: Action) -> bool:
-
         return action == OPPOSITE[self.direction]
 
     def step(self, action: Action) -> StepResult:
-        """."""
-        raise NotImplementedError
+        """Advance the game by one action and return what happened."""
+        if not self._is_reverse(action):
+            self.direction = action
+
+        d_row, d_col = DELTA[self.direction]
+        head_row, head_col = self.snake[0]
+        new_head = (head_row + d_row, head_col + d_col)
+
+        if not self._is_within_bounds(new_head):
+            self.game_over = True
+            return StepResult(Event.HIT_WALL, True, len(self.snake))
+
+        body_without_end = set(self.snake[:-1])
+        if new_head in body_without_end:
+            self.game_over = True
+            return StepResult(Event.HIT_SELF, True, len(self.snake))
+
+        if new_head in self.green_apples:
+            self.snake.insert(0, new_head)
+            self.green_apples.remove(new_head)
+            occupied = (
+                set(self.snake) | set(self.green_apples) | set([self.red_apple])
+            )
+            self.green_apples.append(self._spawn_apple(occupied))
+            return StepResult(Event.ATE_GREEN, True, len(self.snake))
+
+        if new_head == self.red_apple:
+            self.snake.insert(0, new_head)
+            self.snake.pop()
+            self.snake.pop()
+            if not self.snake:
+                self.game_over = True
+                return StepResult(Event.ATE_RED, True, 0)
+            occupied = set(self.snake) | set(self.green_apples)
+            self.red_apple = self._spawn_apple(occupied)
+            return StepResult(Event.ATE_RED, False, len(self.snake))
+
+        self.snake.insert(0, new_head)
+        self.snake.pop()
+        return StepResult(Event.NOTHING, False, len(self.snake))
 
     def reset(self) -> None:
         """Respawn the snake and apples, clearing game-over state."""
