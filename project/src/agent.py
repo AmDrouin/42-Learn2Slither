@@ -1,17 +1,25 @@
 """."""
 
 import random
-from environment import Action
+from environment import Action, Event
 
 
 DEFLT_ALPHA = 0.1    # taux d'apprentissage
 DEFLT_GAMMA = 0.99     # facteur d'actualisation (importance du futur)
 DEFLT_EPSILON = 0.1   # taux d'exploration (epsilon-greedy)
 
-REWARD_GREEN_APPLE = 0
-REWARD_RED_APPLE = 0
-REWARD_DEATH = 0
-REWARD_STEP = 0
+REWARD_GREEN_APPLE = 10
+REWARD_RED_APPLE = -10
+REWARD_DEATH = -100
+REWARD_STEP = -1
+
+REWARD_BY_EVENT = {
+    Event.ATE_GREEN: REWARD_GREEN_APPLE,
+    Event.ATE_RED: REWARD_RED_APPLE,
+    Event.HIT_WALL: REWARD_DEATH,
+    Event.HIT_SELF: REWARD_DEATH,
+    Event.NOTHING: REWARD_STEP,
+}
 
 
 class Agent:
@@ -30,3 +38,26 @@ class Agent:
         if state not in self.q_table:
             self.q_table[state] = {action : 0.0 for action in Action}
         return self.q_table[state]
+
+    def reward_for(self, event: Event) -> float:
+        """Map a step Event to its scalar reward."""
+        return REWARD_BY_EVENT[event]
+
+    def choose_action(self, state: tuple, greedy: bool = False) -> Action:
+        """Epsilon-greedy: explore randomly or exploit the best known action."""
+        q_values = self._ensure_state(state)
+        explore = (not greedy) and (self._rng.random() < self.epsilon)
+        if explore :
+            return self._rng.choice(list(Action))
+        return max(q_values, key=q_values.get)
+
+    def learn(self, state, action, reward, next_state, done) -> None:
+        """Bellman-update the Q-value for (state, action)."""
+        q_values = self._ensure_state(state)
+        current = q_values[action]
+        if done:
+            target = reward
+        else:
+            q_values_next = self._ensure_state(next_state)
+            target = reward + self.gamma * max(q_values_next.values())
+        q_values[action] = current + self.alpha * (target - current)
