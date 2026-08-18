@@ -2,6 +2,7 @@
 
 import random
 from environment import Action, Event
+import pickle
 
 
 DEFLT_ALPHA = 0.1    # taux d'apprentissage
@@ -61,3 +62,13 @@ class Agent:
             q_values_next = self._ensure_state(next_state)
             target = reward + self.gamma * max(q_values_next.values())
         q_values[action] = current + self.alpha * (target - current)
+
+    def save(self, path):
+        """Persist the Q-table to path."""
+        with open(path, "wb") as file:
+            pickle.dump(self.q_table, file)
+
+    def load(self, path):
+        """"Load the Q-table from path."""
+        with open(path, "rb") as file:
+            self.q_table = pickle.load(file)
