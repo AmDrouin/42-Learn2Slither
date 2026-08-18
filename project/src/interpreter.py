@@ -1,7 +1,7 @@
 """Get the state of the Environment and change it to a vision for the snake."""
 
 
-from environment import Environment
+from environment import Environment, Action, MOV_DELTA
 
 CHAR_EMPTY = "0"
 CHAR_WALL = "W"
@@ -25,3 +25,15 @@ class Interpreter:
         if pos == self.env.red_apple:
             return CHAR_RED_APPLE
         return CHAR_EMPTY
+
+    def _look(self, direction: Action) -> str:
+        d_row, d_col = MOV_DELTA[direction]
+        row, col = self.env.snake[0]
+        vision = ""
+        while True:
+            row, col = row + d_row, col + d_col
+            if not self.env._is_within_bounds((row, col)):
+                vision += CHAR_WALL
+                break
+            vision += self._char_for((row, col))
+        return vision
