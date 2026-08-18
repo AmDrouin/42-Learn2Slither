@@ -11,9 +11,9 @@ CHAR_RED_APPLE = "R"
 
 
 class Interpreter:
-    """Change snake vision into Environment state."""
+    """Get Environment state into snake vision."""
 
-    def __init__(self, env : Environment):
+    def __init__(self, env: Environment):
         """Assign environment."""
         self.env = env
 
@@ -37,3 +37,11 @@ class Interpreter:
                 break
             vision += self._char_for((row, col))
         return vision
+
+    def get_vision(self) -> dict[Action, str]:
+        """Return string in all direction."""
+        return {direction: self._look(direction) for direction in Action}
+
+    def to_state_key(self, vision: dict[Action, str]) -> tuple[str, ...]:
+        """Flatten a vision dict into an ordered, hashable Q-table key."""
+        return tuple(vision[direction] for direction in Action)
