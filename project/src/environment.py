@@ -22,6 +22,21 @@ class Action(Enum):
     RIGHT = auto()
 
 
+OPPOSITE = {
+    Action.UP: Action.DOWN,
+    Action.DOWN: Action.UP,
+    Action.LEFT: Action.RIGHT,
+    Action.RIGHT: Action.LEFT,
+}
+
+DELTA = {
+    Action.RIGHT: (0, -1),
+    Action.LEFT: (0, 1),
+    Action.UP: (1, 0),
+    Action.DOWN: (-1, 0),
+}
+
+
 class Event(Enum):
     """Outcome produced by a single Environment.step() call."""
 
@@ -56,24 +71,12 @@ class Environment:
         self.game_over = False
         self.reset()
 
-    def reset(self) -> None:
-        """Respawn the snake and apples, clearing game-over state."""
-        # TODO stub
-        raise NotImplementedError
-
     def _is_within_bounds(self, pos: tuple[int, int]) -> bool:
         row, col = pos
         return 0 <= row < self.height and 0 <= col < self.width
 
     def _spawn_snake(self) -> list[tuple[int, int]]:
         direction = self._rng.choice(list(Action))
-        deltas = {
-            Action.RIGHT: (0, -1),
-            Action.LEFT: (0, 1),
-            Action.UP: (1, 0),
-            Action.DOWN: (-1, 0),
-        }
-
         if direction == Action.RIGHT:
             col = self._rng.randint(INITIAL_SNAKE_SIZE - 1, self.width - 1)
             row = self._rng.randint(0, self.height - 1)
@@ -87,7 +90,7 @@ class Environment:
             row = self._rng.randint(0, self.height - INITIAL_SNAKE_SIZE)
             col = self._rng.randint(0, self.width - 1)
 
-        d_row, d_col = deltas[direction]
+        d_row, d_col = DELTA[direction]
         snake = [
             (row + d_row * i, col + d_col * i)
             for i in range(INITIAL_SNAKE_SIZE)
@@ -96,11 +99,30 @@ class Environment:
         return snake
 
     def _spawn_apple(self, excluded: set[tuple[int, int]]) -> tuple[int, int]:
-        raise NotImplementedError
+        possibleSpawn = [
+            (row, col)
+            for row in range(self.height)
+            for col in range(self.width)
+            if (row, col) not in excluded
+        ]
+        return self._rng.choice(possibleSpawn)
 
     def _is_reverse(self, action: Action) -> bool:
-        raise NotImplementedError
+
+        return action == OPPOSITE[self.direction]
 
     def step(self, action: Action) -> StepResult:
         """."""
         raise NotImplementedError
+
+    def reset(self) -> None:
+        """Respawn the snake and apples, clearing game-over state."""
+        self.snake = self._spawn_snake()
+        occupied = set(self.snake)
+        self.green_apples = []
+        for _ in range(NUM_GREEN_APPLES):
+            apple = self._spawn_apple(occupied)
+            self.green_apples.append(apple)
+            occupied.add(apple)
+        self.red_apple = self._spawn_apple(occupied)
+        self.game_over = False
