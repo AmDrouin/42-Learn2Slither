@@ -1,3 +1,3 @@
 #!/bin/sh
 DIR="$(cd "$(dirname "$0")" && pwd)"
-PYTHONPATH="$DIR/project/src" exec "$DIR/.venv/bin/python" "$DIR/project/src/main.py" "$@"
+PYTHONPATH="$DIR/../src" exec "$DIR/../../.venv/bin/python" "$DIR/../src/main.py" "$@"
