@@ -69,6 +69,6 @@ class Agent:
             pickle.dump(self.q_table, file)
 
     def load(self, path):
-        """"Load the Q-table from path."""
+        """Load the Q-table from path."""
         with open(path, "rb") as file:
             self.q_table = pickle.load(file)
