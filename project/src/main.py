@@ -4,9 +4,10 @@ from cli import parse_args
 from agent import Agent
 from interpreter import Interpreter
 from environment import Environment
+from display import print_action, print_vision
 
 
-def run_episode(env, interp, agent, learn: bool) -> tuple[int, int]:
+def run_episode(env, interp, agent, learn: bool, visual: bool) -> tuple[int, int]:
     """."""
     env.reset()
     duration = 0
@@ -16,6 +17,9 @@ def run_episode(env, interp, agent, learn: bool) -> tuple[int, int]:
         state = interp.to_state_key(vision)
         action = agent.choose_action(state, greedy=not learn)
         result = env.step(action)
+        if visual:
+            print_vision(vision)
+            print_action(action)
         if learn:
             if result.done:
                 next_state = None
@@ -38,8 +42,9 @@ def main() -> None:
         agent.load(args.load)
         print(f"Load trained model from {args.load}")
     learn = not args.dontlearn
+    visual = args.visual == "on"
     for _ in range(args.sessions):
-        len, dur = run_episode(env, interp, agent, learn)
+        len, dur = run_episode(env, interp, agent, learn, visual)
         print(f"Game over, max length = {len}, max duration = {dur}")
     if args.save:
         agent.save(args.save)

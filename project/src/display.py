@@ -18,3 +18,8 @@ def print_vision(vision: dict[Action, str]) -> None:
     print(line)
     for c in down:
         print(" " * head_col + c)
+
+
+def print_action(action: Action) -> None:
+    """Print the action taken by the agent."""
+    print(action.name)
