@@ -7,7 +7,9 @@ import pickle
 
 DEFLT_ALPHA = 0.1    # taux d'apprentissage
 DEFLT_GAMMA = 0.99     # facteur d'actualisation (importance du futur)
-DEFLT_EPSILON = 0.1   # taux d'exploration (epsilon-greedy)
+EPSILON_START = 1.0
+EPSILON_MIN = 0.01
+EPSILON_DECAY = 0.995
 
 REWARD_GREEN_APPLE = 10
 REWARD_RED_APPLE = -10
@@ -26,7 +28,7 @@ REWARD_BY_EVENT = {
 class Agent:
     """Q-learning agent: chooses actions and learns from experience."""
 
-    def __init__(self, alpha=DEFLT_ALPHA, gamma=DEFLT_GAMMA, epsilon=DEFLT_EPSILON, seed=None):
+    def __init__(self, alpha=DEFLT_ALPHA, gamma=DEFLT_GAMMA, epsilon=EPSILON_START, seed=None):
         """Build a Q-learning agent with an empty Q-table."""
         self.alpha = alpha
         self.gamma = gamma
@@ -72,3 +74,7 @@ class Agent:
         """Load the Q-table from path."""
         with open(path, "rb") as file:
             self.q_table = pickle.load(file)
+
+    def decay_epsilon(self) -> None:
+        """."""
+        self.epsilon = max(EPSILON_MIN, self.epsilon * EPSILON_DECAY)
