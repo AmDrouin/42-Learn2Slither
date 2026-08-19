@@ -30,6 +30,7 @@ CELL_SIZE = 30
 DOT_RADIUS = 3
 HEAD_RADIUS = CELL_SIZE // 3
 TRIANGLE_SIZE = CELL_SIZE // 3
+APPLE_RADIUS = CELL_SIZE // 4
 
 COLOR_BG = (20, 20, 20)
 COLOR_GRID_DOT = (90, 90, 90)
@@ -71,3 +72,26 @@ class GraphicalDisplay:
             (cX + TRIANGLE_SIZE, cY + TRIANGLE_SIZE),
         ]
         pygame.draw.polygon(self.screen, COLOR_BODY, summit)
+
+    def render(self) -> None:
+        """."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.close()
+                raise SystemExit
+        self.screen.fill(COLOR_BG)
+        for row in range(self.env.height):
+            for col in range(self.env.width):
+                self._draw_dot((row, col), COLOR_GRID_DOT, DOT_RADIUS)
+        for apple in self.env.green_apples:
+            self._draw_dot(apple, COLOR_GREEN_APPLE, APPLE_RADIUS)
+        self._draw_dot(self.env.red_apple, COLOR_RED_APPLE, APPLE_RADIUS)
+        self._draw_head(self.env.snake[0])
+        for _ in self.env.snake[1:]:
+            self._draw_body_triangle(_)
+        pygame.display.flip()
+        self.clock.tick(self.fps)
+
+    def close(self) -> None:
+        """Close the pygame window."""
+        pygame.quit()
