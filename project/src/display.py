@@ -1,6 +1,7 @@
 """Display in terminal and in pygame window."""
 
 import pygame
+import os
 from environment import Action
 
 
@@ -26,7 +27,7 @@ def print_action(action: Action) -> None:
     print(action.name)
 
 
-CELL_SIZE = 30
+CELL_SIZE = 32
 DOT_RADIUS = 3
 HEAD_RADIUS = CELL_SIZE // 3
 TRIANGLE_SIZE = CELL_SIZE // 3
@@ -38,6 +39,15 @@ COLOR_GREEN_APPLE = (0, 200, 0)
 COLOR_RED_APPLE = (200, 0, 0)
 COLOR_HEAD = (220, 30, 30)
 COLOR_BODY = (0, 180, 0)
+
+ASSET_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
+
+TRIANGLE_OFFSETS = {
+    (-1, 0): [(0, -1), (-1, 1), (1, 1)],
+    (1, 0):  [(0, 1), (-1, -1), (1, -1)],
+    (0, -1): [(-1, 0), (1, -1), (1, 1)],
+    (0, 1):  [(1, 0), (-1, -1), (-1, 1)],
+}
 
 
 class GraphicalDisplay:
@@ -52,6 +62,15 @@ class GraphicalDisplay:
         height_px = env.height * CELL_SIZE
         self.screen = pygame.display.set_mode((width_px, height_px))
         pygame.display.set_caption("Snake Game")
+
+        self.green_apple_img = pygame.transform.scale(
+            pygame.image.load(os.path.join(ASSET_DIR, "green_apple.png")).convert_alpha(),
+            (CELL_SIZE, CELL_SIZE),
+        )
+        self.red_apple_img = pygame.transform.scale(
+            pygame.image.load(os.path.join(ASSET_DIR, "red_apple.png")).convert_alpha(),
+            (CELL_SIZE, CELL_SIZE),
+            )
         self.clock = pygame.time.Clock()
 
     def _cell_center(self, pos: tuple[int, int]) -> tuple[int, int]:
@@ -64,14 +83,11 @@ class GraphicalDisplay:
     def _draw_head(self, pos: tuple[int, int]) -> None:
         self._draw_dot(pos, COLOR_HEAD, HEAD_RADIUS)
 
-    def _draw_body_triangle(self, pos: tuple[int, int]) -> None:
+    def _draw_body_triangle(self, pos, direction) -> None:
         cX, cY = self._cell_center(pos)
-        summit = [
-            (cX, cY - TRIANGLE_SIZE),
-            (cX - TRIANGLE_SIZE, cY + TRIANGLE_SIZE),
-            (cX + TRIANGLE_SIZE, cY + TRIANGLE_SIZE),
-        ]
-        pygame.draw.polygon(self.screen, COLOR_BODY, summit)
+        offsets = TRIANGLE_OFFSETS[direction]
+        points = [(cX + ox * TRIANGLE_SIZE, cY + oy * TRIANGLE_SIZE) for ox, oy in offsets]
+        pygame.draw.polygon(self.screen, COLOR_BODY, points)
 
     def render(self) -> None:
         """."""
@@ -84,14 +100,22 @@ class GraphicalDisplay:
             for col in range(self.env.width):
                 self._draw_dot((row, col), COLOR_GRID_DOT, DOT_RADIUS)
         for apple in self.env.green_apples:
-            self._draw_dot(apple, COLOR_GREEN_APPLE, APPLE_RADIUS)
-        self._draw_dot(self.env.red_apple, COLOR_RED_APPLE, APPLE_RADIUS)
+            self._draw_image(apple, self.green_apple_img)
+        self._draw_image(self.env.red_apple, self.red_apple_img)
         self._draw_head(self.env.snake[0])
-        for _ in self.env.snake[1:]:
-            self._draw_body_triangle(_)
+        for i in range(1, len(self.env.snake)):
+            pos = self.env.snake[i]
+            toward_head = self.env.snake[i - 1]
+            direction = (toward_head[0] - pos[0], toward_head[1] - pos[1])
+            self._draw_body_triangle(pos, direction)
         pygame.display.flip()
         self.clock.tick(self.fps)
 
     def close(self) -> None:
         """Close the pygame window."""
         pygame.quit()
+
+    def _draw_image(self, pos: tuple[int, int], image) -> None:
+        cx, cy = self._cell_center(pos)
+        rect = image.get_rect(center=(cx, cy))
+        self.screen.blit(image, rect)
