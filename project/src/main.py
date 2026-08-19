@@ -54,6 +54,8 @@ def main() -> None:
         mlen, dur = run_episode(
             env, interp, agent, learn, visual, disp, args.step_by_step
         )
+        if learn:
+            agent.decay_epsilon()
         print(f"Game over, max length = {mlen}, max duration = {dur}")
     if disp:
         disp.close()
