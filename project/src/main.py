@@ -44,8 +44,8 @@ def main() -> None:
     learn = not args.dontlearn
     visual = args.visual == "on"
     for _ in range(args.sessions):
-        len, dur = run_episode(env, interp, agent, learn, visual)
-        print(f"Game over, max length = {len}, max duration = {dur}")
+        mlen, dur = run_episode(env, interp, agent, learn, visual)
+        print(f"Game over, max length = {mlen}, max duration = {dur}")
     if args.save:
         agent.save(args.save)
         print(f"Save learning state in {args.save}")
