@@ -4,7 +4,7 @@ from cli import parse_args
 from agent import Agent
 from interpreter import Interpreter
 from environment import Environment
-from display import print_action, print_vision, GraphicalDisplay
+from display import print_action, print_vision, GraphicalDisplay, SPEED_FPS
 
 
 def run_episode(
@@ -49,7 +49,7 @@ def main() -> None:
         print(f"Load trained model from {args.load}")
     learn = not args.dontlearn
     visual = args.visual == "on"
-    disp = GraphicalDisplay(env) if visual else None
+    disp = GraphicalDisplay(env, fps=SPEED_FPS[args.speed]) if visual else None
     for _ in range(args.sessions):
         mlen, dur = run_episode(
             env, interp, agent, learn, visual, disp, args.step_by_step

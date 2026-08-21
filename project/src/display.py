@@ -39,6 +39,7 @@ COLOR_GREEN_APPLE = (0, 200, 0)
 COLOR_RED_APPLE = (200, 0, 0)
 COLOR_HEAD = (220, 30, 30)
 COLOR_BODY = (0, 180, 0)
+SPEED_FPS = {"slow": 4, "normal": 10, "fast": 20}
 
 ASSET_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
 
