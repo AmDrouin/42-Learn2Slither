@@ -105,13 +105,15 @@ class Environment:
         self.direction = direction
         return snake
 
-    def _spawn_apple(self, excluded: set[tuple[int, int]]) -> tuple[int, int]:
+    def _spawn_apple(self, excluded: set[tuple[int, int]]) -> tuple[int, int] | None:
         possibleSpawn = [
             (row, col)
             for row in range(self.height)
             for col in range(self.width)
             if (row, col) not in excluded
         ]
+        if not possibleSpawn:
+            return None
         return self._rng.choice(possibleSpawn)
 
     def _is_reverse(self, action: Action) -> bool:
@@ -130,18 +132,21 @@ class Environment:
             self.game_over = True
             return StepResult(Event.HIT_WALL, True, len(self.snake))
 
-        body_without_end = set(self.snake[:-1])
-        if new_head in body_without_end:
+        will_grow = new_head in self.green_apples
+        body_to_check = set(self.snake) if will_grow else set(self.snake[:-1])
+        if new_head in body_to_check:
             self.game_over = True
             return StepResult(Event.HIT_SELF, True, len(self.snake))
 
-        if new_head in self.green_apples:
+        if will_grow:
             self.snake.insert(0, new_head)
             self.green_apples.remove(new_head)
             occupied = (
                 set(self.snake) | set(self.green_apples) | set([self.red_apple])
             )
-            self.green_apples.append(self._spawn_apple(occupied))
+            new_apple = self._spawn_apple(occupied)
+            if new_apple is not None:
+                self.green_apples.append(new_apple)
             return StepResult(Event.ATE_GREEN, False, len(self.snake))
 
         if new_head == self.red_apple:
@@ -166,7 +171,8 @@ class Environment:
         self.green_apples = []
         for _ in range(NUM_GREEN_APPLES):
             apple = self._spawn_apple(occupied)
-            self.green_apples.append(apple)
-            occupied.add(apple)
+            if apple is not None:
+                self.green_apples.append(apple)
+                occupied.add(apple)
         self.red_apple = self._spawn_apple(occupied)
         self.game_over = False
