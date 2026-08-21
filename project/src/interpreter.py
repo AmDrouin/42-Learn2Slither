@@ -1,13 +1,26 @@
 """Get the state of the Environment and change it to a vision for the snake."""
 
 
-from environment import Environment, Action, MOV_DELTA
+from environment import Environment, Action, MOV_DELTA, Event
 
 CHAR_EMPTY = "0"
 CHAR_WALL = "W"
 CHAR_SNAKE_BODY = "S"
 CHAR_GREEN_APPLE = "G"
 CHAR_RED_APPLE = "R"
+
+REWARD_GREEN_APPLE = 10
+REWARD_RED_APPLE = -10
+REWARD_DEATH = -100
+REWARD_STEP = -1
+
+REWARD_BY_EVENT = {
+    Event.ATE_GREEN: REWARD_GREEN_APPLE,
+    Event.ATE_RED: REWARD_RED_APPLE,
+    Event.HIT_WALL: REWARD_DEATH,
+    Event.HIT_SELF: REWARD_DEATH,
+    Event.NOTHING: REWARD_STEP,
+}
 
 
 class Interpreter:
@@ -45,3 +58,7 @@ class Interpreter:
     def to_state_key(self, vision: dict[Action, str]) -> tuple[str, ...]:
         """Flatten a vision dict into an ordered, hashable Q-table key."""
         return tuple(vision[direction] for direction in Action)
+
+    def reward_for(self, event: Event) -> float:
+        """Map a step Event to its scalar reward."""
+        return REWARD_BY_EVENT[event]

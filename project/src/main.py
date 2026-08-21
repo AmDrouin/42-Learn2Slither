@@ -31,7 +31,7 @@ def run_episode(
                 next_state = None
             else:
                 next_state = interp.to_state_key(interp.get_vision())
-            reward = agent.reward_for(result.event)
+            reward = interp.reward_for(result.event)
             agent.learn(state, action, reward, next_state, result.done)
         duration += 1
         max_length = max(max_length, len(env.snake))

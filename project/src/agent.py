@@ -1,7 +1,7 @@
 """."""
 
 import random
-from environment import Action, Event
+from environment import Action
 import pickle
 
 
@@ -10,19 +10,6 @@ DEFLT_GAMMA = 0.99     # facteur d'actualisation (importance du futur)
 EPSILON_START = 1.0
 EPSILON_MIN = 0.01
 EPSILON_DECAY = 0.995
-
-REWARD_GREEN_APPLE = 10
-REWARD_RED_APPLE = -10
-REWARD_DEATH = -100
-REWARD_STEP = -1
-
-REWARD_BY_EVENT = {
-    Event.ATE_GREEN: REWARD_GREEN_APPLE,
-    Event.ATE_RED: REWARD_RED_APPLE,
-    Event.HIT_WALL: REWARD_DEATH,
-    Event.HIT_SELF: REWARD_DEATH,
-    Event.NOTHING: REWARD_STEP,
-}
 
 
 class Agent:
@@ -41,10 +28,6 @@ class Agent:
         if state not in self.q_table:
             self.q_table[state] = {action : 0.0 for action in Action}
         return self.q_table[state]
-
-    def reward_for(self, event: Event) -> float:
-        """Map a step Event to its scalar reward."""
-        return REWARD_BY_EVENT[event]
 
     def choose_action(self, state: tuple, greedy: bool = False) -> Action:
         """Epsilon-greedy: explore randomly or exploit the best known action."""
